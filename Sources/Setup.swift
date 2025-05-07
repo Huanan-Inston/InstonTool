@@ -9,42 +9,6 @@ import ArgumentParser
 import Foundation
 import RegexBuilder
 
-enum ProjHelper {
-
-    static let sourceFileValidSuffix = [".m", ".mm", ".h", ".swift"]
-
-    static func getAllSourceFilesPath(
-        _ path: URL,
-        propertiesForKeys: [URLResourceKey] = [.isRegularFileKey, .nameKey]
-    )
-        throws -> [URL]
-    {
-
-        try getAllSourceFilesPath(path, propertiesForKeys: propertiesForKeys) { _, props in
-            sourceFileValidSuffix.contains { props.name?.hasSuffix($0) ?? false }
-        }
-    }
-
-    static func getAllSourceFilesPath(
-        _ path: URL,
-        propertiesForKeys: [URLResourceKey] = [.isRegularFileKey, .nameKey],
-        predicate: (URL, URLResourceValues) -> Bool
-    )
-        throws -> [URL]
-    {
-        guard let dirEnum = FileManager.default.enumerator(at: path, includingPropertiesForKeys: propertiesForKeys) else {
-            throw NSError()
-        }
-
-        let result = try dirEnum.compactMap({ $0 as? URL }).filter { item in
-            let values = try item.resourceValues(forKeys: Set(propertiesForKeys))
-            return values.isRegularFile == true && predicate(item, values)
-        }
-
-        return result
-    }
-}
-
 
 struct Setup: AsyncParsableCommand {
 
@@ -55,10 +19,10 @@ struct Setup: AsyncParsableCommand {
     var strings: URL
 
     @Option(name: .customLong("proj"), help: "The path to the project sources files", transform: { URL(fileURLWithPath: $0).standardizedFileURL })
-    var projectFolder: URL = .init(string: "../..")!.standardizedFileURL
+    var projectFolder: URL = .init(fileURLWithPath: ".").standardizedFileURL
 
-    @Option(name: .customLong("keys"), help: "The path of 'keys' to be read or saved", transform: { URL(fileURLWithPath: $0).standardizedFileURL })
-    var assetsStore: URL = .init(string: "../Assets")!.standardizedFileURL
+    @Option(name: .customLong("assets"), help: "The path of 'keys' to be read or saved", transform: { URL(fileURLWithPath: $0).standardizedFileURL })
+    var assetsStore: URL = .init(fileURLWithPath: "./scripts/Assets").standardizedFileURL
 
     @Option(help: "Suppress Logs")
     var quiet: Bool = false
@@ -67,15 +31,15 @@ struct Setup: AsyncParsableCommand {
         let stringsFilesPath = try LocalizeHelper.getAllStringsPath(strings)
 
         let keys = try grabAllKeys(stringsFilesPath)
-        try LocalizeHelper.saveKeysToStore(assetsStore.appending(path: "keys.all"), keys: keys)
-        print("[INFO]: Find \(keys.count) keys inside Strings('\(strings.path())') with \(stringsFilesPath.count) files.")
+        try LocalizeHelper.saveKeysToStore(assetsStore.appending(path: AssetsHelper.AllKey), keys: keys)
+        print("[INFO]: Find \(keys.count) keys form \(stringsFilesPath.count) files, located in '\(strings.path())'.")
 
         let sourceFiles = try ProjHelper.getAllSourceFilesPath(projectFolder)
         let used = try parserAllUsedKeys(sourceFiles, patterns: pattern)
-        try LocalizeHelper.saveKeysToStore(assetsStore.appending(path: "keys.used"), keys: used)
+        try LocalizeHelper.saveKeysToStore(assetsStore.appending(path: AssetsHelper.UsedKey), keys: used)
         print("[INFO]: Find \(used.count) keys used in source files. \(sourceFiles.count) files found.")
 
-        let missing = try LocalizeHelper.readKeysFromStore(assetsStore.appending(path: "keys.miss"))
+        let missing = try LocalizeHelper.readKeysFromStore(assetsStore.appending(path: AssetsHelper.MissKey))
         if missing.isEmpty {
             print("[WARN]: The 'Missing Keys' is empty. Consider adding missing keys into the file('Assets/keys.miss') and rerun the command.")
         } else {
@@ -83,7 +47,7 @@ struct Setup: AsyncParsableCommand {
         }
 
         let valid = keys.intersection(used).subtracting(missing)
-        try LocalizeHelper.saveKeysToStore(assetsStore.appending(path: "keys.used"), keys: valid)
+        try LocalizeHelper.saveKeysToStore(assetsStore.appending(path: AssetsHelper.Key), keys: valid)
         print("[INFO]: Find \(valid.count) valid keys. Saved to file('Assets/keys.used').")
     }
 
@@ -107,7 +71,6 @@ struct Setup: AsyncParsableCommand {
             }
 
             for pattern in pattern {
-                // let pattern = "(?<=L\\(@\")([_\\w]+)(?=\")"
                 let regex = try NSRegularExpression(pattern: pattern, options: [])
                 let matches = regex.matches(in: content, range: .init(content.startIndex ..< content.endIndex, in: content))
                 for match in matches {
