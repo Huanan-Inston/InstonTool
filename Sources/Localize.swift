@@ -8,17 +8,17 @@ struct Localize: AsyncParsableCommand {
     var strings: URL
 
     @Option(name: .customLong("assets"), help: "The path of 'keys' to be read or saved", transform: { URL(fileURLWithPath: $0).standardizedFileURL })
-    var assetsStore: URL = .init(fileURLWithPath: "../Assets").standardizedFileURL
+    var assetsStore: URL = .init(fileURLWithPath: "./scripts/Assets").standardizedFileURL
 
     @Option(name: .customLong("cfg"), help: "The path of configutation file", transform: { URL(fileURLWithPath: $0).standardizedFileURL })
-    var cfgPath: URL?
+    var cfgPath: URL = .init(fileURLWithPath: "./scripts/inston.yaml").standardizedFileURL
 
     @Option(name: .customLong("downloaded"), help: "The path of configutation file", transform: { URL(fileURLWithPath: $0).standardizedFileURL })
-    var downloaded: URL = .init(fileURLWithPath: "../Assets/stringsdownload/").standardizedFileURL
+    var downloaded: URL = .init(fileURLWithPath: "./scripts/Assets/stringsdownload/").standardizedFileURL
 
     mutating func run() async throws {
         let cfg = try LocalizeConfiguration.load(cfgPath) ?? .default
-        print("[INFO]: Read Configuration from file('\(cfgPath?.path() ?? "nil")'): ")
+        print("[INFO]: Read Configuration from file('\(cfgPath.path())'): ")
         print(cfg)
 
         let stringsFilesPaths = try LocalizeHelper.getAllStringsPath(strings)

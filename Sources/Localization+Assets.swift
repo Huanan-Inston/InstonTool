@@ -11,5 +11,5 @@ extension AssetsHelper {
     static let AllKey: String = "keys.all"
     static let MissKey: String = "keys.miss"
     static let UsedKey: String = "keys.used"
-    static let Key: String = "keys.used"
+    static let Key: String = "keys"
 }
