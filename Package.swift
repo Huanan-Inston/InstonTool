@@ -6,6 +6,9 @@ import PackageDescription
 let package = Package(
     name: "CLI",
     platforms: [.macOS(.v15)],
+    products: [
+        .executable(name: "Tool", targets: ["Tool"]),
+    ],
     dependencies: [
         .package(url: "https://github.com/apple/swift-argument-parser.git", from: "1.2.0"),
         .package(url: "https://github.com/jpsim/Yams.git", from: "5.1.3")
