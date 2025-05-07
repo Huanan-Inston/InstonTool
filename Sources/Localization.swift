@@ -115,9 +115,9 @@ extension LocalizeHelper {
                     print("        cur: \(oldValue.debugDescription)")
                     print("        new: \(value.debugDescription)")
                 } else {
-                    print("[INFO]: Key(\(key)) has conflict. Ignored.")
-                    print("        cur: \(oldValue.debugDescription)")
-                    print("        new: \(value.debugDescription)")
+//                    print("[INFO]: Key(\(key)) has conflict. Ignored.")
+//                    print("        cur: \(oldValue.debugDescription)")
+//                    print("        new: \(value.debugDescription)")
                 }
             } else {
                 updated[key] = value
