@@ -21,18 +21,18 @@ struct Localize: AsyncParsableCommand {
         print("[INFO]: Read Configuration from file('\(cfgPath.path())'): ")
         print(cfg)
 
-        let stringsFilesPaths = try LocalizeHelper.getAllStringsPath(strings)
-        print("[INFO]: Find \(stringsFilesPaths.count) Strings file.")
+        let localizations = try LocalizeHelper.getAllStringsPath(strings)
+        print("[INFO]: Find \(localizations.count) Strings file.")
 
-        for stringsFilesPath in stringsFilesPaths {
-            print("[INFO]: Processing Lang(\(stringsFilesPath.lang)). Path: \(stringsFilesPath.url.path())")
-            let old = LocalizeHelper.getLocalization(stringsFilesPath)
+        for localization in localizations {
+            print("[INFO]: Processing Lang(\(localization.lang)). Path: \(localization.url.path())")
+            let old = LocalizeHelper.getLocalization(localization)
 
             let newLang = cfg.mapLangName(apple: old.lang)
             let newURL = downloaded.appending(path: "\(newLang).strings")
 
             guard FileManager.default.fileExists(atPath: newURL.path()) else {
-                print("[WARN]: Skiped for Lang(\(stringsFilesPath.lang)). Could not find downloaded file. Shuold at '\(newURL.path())'")
+                print("[WARN]: Skiped for Lang(\(localization.lang)). Could not find downloaded file. Shuold at '\(newURL.path())'")
                 continue
             }
 
@@ -42,7 +42,7 @@ struct Localize: AsyncParsableCommand {
             let updated = LocalizeHelper.updateLocalization(old: old, new: new) { cfg.ignoreKeys.contains($0) }
             try LocalizeHelper.writeLocalization(updated)
 
-            print("[INFO]: Finish Lang(\(stringsFilesPath.lang)).")
+            print("[INFO]: Finish Lang(\(localization.lang)).")
         }
     }
 }
