@@ -18,21 +18,21 @@ struct GenerateStringsFile {
 extension GenerateStringsFile {
     func generate() throws {
         let template = try Template(template)
-        let content = try template.render(["keys": keys])
+        let content = try template.render(["keys": keys.sorted()])
         try content.write(to: output, atomically: true, encoding: .utf8)
     }
 }
 
 struct Generate: AsyncParsableCommand {
 
+    @Argument(help: "The path to the templates. Notice file extension should be end with `.template`, and file name will be use as output file name", transform: { URL(fileURLWithPath: $0).standardizedFileURL })
+    var templates: [URL]
+
     @Option(help: "The path of 'Strings'", transform: { URL(fileURLWithPath: $0).standardizedFileURL })
     var strings: URL
 
-    @Option(name: [.short, .long], help: "The output path for generated strings file", transform: { URL(fileURLWithPath: $0).standardizedFileURL })
+    @Option(name: [.short, .long], help: "The output folder for generated file", transform: { URL(fileURLWithPath: $0).standardizedFileURL })
     var output: URL
-
-    @Option(name: [.short, .long], help: "The template path", transform: { URL(fileURLWithPath: $0).standardizedFileURL })
-    var template: URL
 
     func run() async throws {
         let localizations = try LocalizeHelper.getAllStringsPath(strings)
@@ -41,26 +41,19 @@ struct Generate: AsyncParsableCommand {
         let keys = try grabAllKeys(localizations)
         print("[INFO]: Find \(keys.count) keys form \(localizations.count) files, located in '\(strings.path())'.")
 
-        let file = GenerateStringsFile(output: output, keys: Array(keys), template: """
-        import Foundation
-        
-        struct L {
-            let raw: String
-        }
-        
-        extension L {
-        func tr() -> NSLocalizedString {
-            return NSLocalizedString(raw, comment: "")
-        }
-        
-        extension L {
-            {% for key in keys %}
-            static let _{{ key }} = L(raw: "{{ key }}")
-            {% endfor %}
-        }
-        """)
+        for template in templates {
+            let fileName = template.deletingPathExtension().lastPathComponent
+            if !FileManager.default.fileExists(atPath: template.path()) {
+                print("[WARN]: Template file not found.")
+                continue
+            }
 
-        try file.generate()
+            let path = output.appending(path: fileName)
+            let templateContent = try String(contentsOf: template, encoding: .utf8)
+            let file = GenerateStringsFile(output: path, keys: Array(keys), template: templateContent)
+            try file.generate()
+            print("[INFO]: File Generated. Save to \(path.path())")
+        }
     }
 
     func grabAllKeys(_ localizations: [Localization]) throws -> Set<String> {
