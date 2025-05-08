@@ -66,24 +66,6 @@ extension LocalizeHelper {
     }
 }
 
-func escapeString(_ val: String) -> String {
-
-    let replacements: [(String, String)] = [
-        ("\\", "\\\\"),
-        ("\t", "\\t"),
-        ("\n", "\\n"),
-        ("\r", "\\r"),
-        ("\"", "\\\"")
-    ]
-
-    var str = val
-    for (template, replacement) in replacements {
-        str = str.replacingOccurrences(of: template, with: replacement)
-    }
-
-    return "\"\(str)\""
-}
-
 extension LocalizeHelper {
     static func writeLocalization(_ localization: Localization) throws {
         guard let content = localization.content else {
@@ -92,7 +74,7 @@ extension LocalizeHelper {
 
         var builder = ""
         for (key, value) in content.sorted(using: KeyPathComparator(\.key)) {
-            builder += "\(escapeString(key))=\(escapeString(value));\n"
+            builder += "\(key.debugDescription)=\(value.debugDescription);\n"
         }
 
         try builder.write(to: localization.url, atomically: true, encoding: .utf8)

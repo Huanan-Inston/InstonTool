@@ -36,8 +36,8 @@ extension LocalizeConfiguration {
             return nil
         }
 
-        let data = try Data(contentsOf: path)
-        guard !data.isEmpty else {
+        guard let data = try? Data(contentsOf: path),
+              !data.isEmpty else {
             return nil
         }
 
