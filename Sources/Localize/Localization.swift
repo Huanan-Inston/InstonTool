@@ -130,6 +130,10 @@ extension LocalizeHelper {
 
 extension LocalizeHelper {
     static func readKeysFromStore(_ path: URL) throws -> Set<String> {
+        guard FileManager.default.fileExists(atPath: path.path()) else {
+            return .init()
+        }
+
         let content = try String(contentsOf: path, encoding: .utf8)
         let keys = content.split(separator: "\n").map { String($0) }
         return .init(keys)
