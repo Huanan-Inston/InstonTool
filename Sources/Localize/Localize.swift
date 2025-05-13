@@ -35,7 +35,7 @@ struct Localize: AsyncParsableCommand {
             let newLocalization = Localization(lang: newLang, url: newURL, content: nil)
             let new = LocalizeHelper.getLocalization(newLocalization)
 
-            let updated = LocalizeHelper.updateLocalization(old: old, new: new) { cfg.ignoreKeys.contains($0) }
+            let updated = LocalizeHelper.updateLocalization(old: old, new: new) { cfg.ignoreKeys?.contains($0) ?? false }
             try LocalizeHelper.writeLocalization(updated)
 
             print("[INFO]: Finish Lang(\(localization.lang)).")

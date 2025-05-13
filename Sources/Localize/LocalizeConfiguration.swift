@@ -15,11 +15,11 @@ struct LocalizeConfiguration: Codable {
     }
 
     /// FROM PROJECT LANG NAME TO INSTON's LANG NAME
-    let langNameMap: [String: String]
+    let langNameMap: [String: String]?
 
-    let ignoreKeys: [String]
+    let ignoreKeys: [String]?
 
-    static let `default`: LocalizeConfiguration = .init(langNameMap: [:], ignoreKeys: [])
+    static let `default`: LocalizeConfiguration = .init(langNameMap: nil, ignoreKeys: nil)
 }
 
 extension LocalizeConfiguration: CustomStringConvertible {
@@ -50,6 +50,6 @@ extension LocalizeConfiguration {
 
 extension LocalizeConfiguration {
     func mapLangName(apple: String) -> String {
-        self.langNameMap[apple] ?? apple
+        self.langNameMap?[apple] ?? apple
     }
 }
