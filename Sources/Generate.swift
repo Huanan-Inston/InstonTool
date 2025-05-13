@@ -25,10 +25,19 @@ extension GenerateStringsFile {
 
 struct Generate: AsyncParsableCommand {
 
-    @Argument(help: "The path to the templates. Notice file extension should be end with `.template`, and file name will be use as output file name", transform: { URL(fileURLWithPath: $0).standardizedFileURL })
+    @Argument(help: .init("The file paths of the templates. ",
+                          discussion: """
+                          Notice file extension should be end with `.template`, and file name will be use as output file name.
+                          Example: 
+                            - 'OCL+Keys.h.template' -> '$OUTPUT/OCL+Keys.h'
+                            - 'R.swift.template' -> '$OUTPUT/R.swift'
+                          """),
+              transform: { URL(fileURLWithPath: $0).standardizedFileURL })
     var templates: [URL]
 
-    @Option(help: "The path of 'Strings'", transform: { URL(fileURLWithPath: $0).standardizedFileURL })
+    @Option(help: .init("The path of 'Strings'.",
+                        discussion: "The path should be a folder, and contains several `*.lproj` folders."),
+            transform: { URL(fileURLWithPath: $0).standardizedFileURL })
     var strings: URL
 
     @Option(name: [.short, .long], help: "The output folder for generated file", transform: { URL(fileURLWithPath: $0).standardizedFileURL })

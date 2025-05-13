@@ -4,7 +4,9 @@ import Yams
 
 struct Localize: AsyncParsableCommand {
 
-    @Option(help: "The path of 'Strings'", transform: { URL(fileURLWithPath: $0).standardizedFileURL })
+    @Option(help: .init("The path of 'Strings'.",
+                        discussion: "The path should be a folder, and contains several `*.lproj` folders."),
+            transform: { URL(fileURLWithPath: $0).standardizedFileURL })
     var strings: URL
 
     @Option(name: .customLong("cfg"), help: "The path of configutation file", transform: { URL(fileURLWithPath: $0).standardizedFileURL })

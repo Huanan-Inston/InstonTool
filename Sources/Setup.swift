@@ -12,16 +12,22 @@ import RegexBuilder
 
 struct Setup: AsyncParsableCommand {
 
-    @Argument(help: "The regex express to filer in the keys inside project")
+    @Argument(help: .init("The regex express to filer in the keys inside project",
+                          discussion: "Before execute the command, you can test the regex using `ripgrep`"))
     var pattern: [String] = []
 
-    @Option(help: "The path of 'Strings'", transform: { URL(fileURLWithPath: $0).standardizedFileURL })
+    @Option(help: .init("The folder path of 'Strings'.",
+                        discussion: "The folder should contain several `*.lproj` folders."),
+            transform: { URL(fileURLWithPath: $0).standardizedFileURL })
     var strings: URL
 
-    @Option(name: .customLong("proj"), help: "The path to the project sources files", transform: { URL(fileURLWithPath: $0).standardizedFileURL })
+    @Option(name: .customLong("proj"),
+            help: .init("The folder path contains project sources files",
+                        discussion: "Default: Current Path"),
+            transform: { URL(fileURLWithPath: $0).standardizedFileURL })
     var projectFolder: URL = .init(fileURLWithPath: ".").standardizedFileURL
 
-    @Option(name: .customLong("assets"), help: "The path of 'keys' to be read or saved", transform: { URL(fileURLWithPath: $0).standardizedFileURL })
+    @Option(name: .customLong("assets"), help: "The folder path where the 'keys' to be read or saved", transform: { URL(fileURLWithPath: $0).standardizedFileURL })
     var assetsStore: URL = .init(fileURLWithPath: "./scripts/Assets").standardizedFileURL
 
     @Option(help: "Suppress Logs")
