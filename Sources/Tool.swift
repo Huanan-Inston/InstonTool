@@ -22,6 +22,6 @@ struct Tool: AsyncParsableCommand {
         example:
           - mint run Huanan-Inston/InstonTool localize --strings ./MapRunner/Strings
         """,
-        subcommands: [Localize.self, Setup.self, Generate.self],
+        subcommands: [Localize.self, Setup.self, Generate.self, IPAServer.self],
         defaultSubcommand: nil)
 }
