@@ -99,6 +99,10 @@ struct IPAServer: AsyncParsableCommand {
             let indexHtmlTemplateContent = try String(contentsOf: indexHtmlTemplateFilePath, encoding: .utf8)
             let indexHtmlTemplate = try Jinja.Template(indexHtmlTemplateContent)
 
+            if newestManifests.count != manifests.count {
+                notify()
+            }
+
             try generateIndexHtml(newestManifests, using: indexHtmlTemplate)
         }
     }
@@ -161,6 +165,20 @@ struct IPAServer: AsyncParsableCommand {
         let remote = try uploadFile(path)
 
         return .init(name: ipaExport.info.name, sha256: ipaExport.sha256, version: ipaExport.info.version, identifier: ipaExport.info.identifier, buildAt:ipaExport.buildAt, remote: remote, icon: icon ?? "")
+    }
+
+    func notify() {
+        let task = Process()
+        let outputPipe = Pipe()
+
+        task.executableURL = URL(filePath: "/usr/bin/osascript", directoryHint: .notDirectory, relativeTo: nil)
+        task.arguments = [
+            "display notification \"APP Manifests Updated\" with title \"Inston Tool\""
+        ]
+
+        task.standardOutput = outputPipe
+
+        try? task.run()
     }
 
     func uploadFile(_ path: URL) throws -> URL {
