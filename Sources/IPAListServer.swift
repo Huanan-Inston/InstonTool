@@ -173,6 +173,7 @@ struct IPAServer: AsyncParsableCommand {
 
         task.executableURL = URL(filePath: "/usr/bin/osascript", directoryHint: .notDirectory, relativeTo: nil)
         task.arguments = [
+            "-e",
             "display notification \"APP Manifests Updated\" with title \"Inston Tool\""
         ]
 
