@@ -7,12 +7,14 @@ let package = Package(
     name: "CLI",
     platforms: [.macOS(.v15)],
     products: [
-        .executable(name: "Tool", targets: ["Tool"]),
+        .executable(name: "Tool", targets: ["Tool"])
     ],
     dependencies: [
         .package(url: "https://github.com/apple/swift-argument-parser.git", from: "1.2.0"),
         .package(url: "https://github.com/jpsim/Yams.git", from: "5.1.3"),
-        .package(url: "https://github.com/johnmai-dev/Jinja.git", from: "1.1.2")
+        .package(url: "https://github.com/johnmai-dev/Jinja.git", from: "1.1.2"),
+        .package(url: "https://github.com/objecthub/swift-dynamicjson", from: "1.0.2"),
+
     ],
     targets: [
         // Targets are the basic building blocks of a package, defining a module or a test suite.
@@ -23,7 +25,15 @@ let package = Package(
                 .product(name: "ArgumentParser", package: "swift-argument-parser"),
                 .product(name: "Yams", package: "Yams"),
                 .product(name: "Jinja", package: "Jinja"),
+                .product(name: "DynamicJSON", package: "swift-dynamicjson"),
             ]
         ),
+        .testTarget(
+            name: "ToolTests",
+            dependencies: ["Tool"],
+            resources: [
+                .process("Resources"),
+            ]
+        )
     ]
 )

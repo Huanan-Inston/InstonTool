@@ -1,0 +1,144 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "Bar" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "device" : {
+              "appletv" : {
+                "stringUnit" : {
+                  "state" : "needs_review",
+                  "value" : "%@ bar"
+                }
+              },
+              "applevision" : {
+                "stringUnit" : {
+                  "state" : "needs_review",
+                  "value" : "%@ bar"
+                }
+              },
+              "applewatch" : {
+                "stringUnit" : {
+                  "state" : "needs_review",
+                  "value" : "%@ bar"
+                }
+              },
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "needs_review",
+                  "value" : "%@ bar"
+                }
+              },
+              "iphone" : {
+                "stringUnit" : {
+                  "state" : "needs_review",
+                  "value" : "%@ bar"
+                }
+              },
+              "ipod" : {
+                "stringUnit" : {
+                  "state" : "needs_review",
+                  "value" : "%@ bar"
+                }
+              },
+              "mac" : {
+                "stringUnit" : {
+                  "state" : "needs_review",
+                  "value" : "%@ bar"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%@ bar"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "Baz" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "needs_review",
+                  "value" : "%d baz"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%d baz"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "Foo" : {
+      "extractionState" : "manual"
+    },
+    "Quux" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "device" : {
+              "appletv" : {
+                "variations" : {
+                  "plural" : {
+                    "one" : {
+                      "stringUnit" : {
+                        "state" : "needs_review",
+                        "value" : "%1$(Hi)llu quux"
+                      }
+                    },
+                    "other" : {
+                      "stringUnit" : {
+                        "state" : "needs_review",
+                        "value" : "%1$(Hi)llu quux"
+                      }
+                    }
+                  }
+                }
+              },
+              "iphone" : {
+                "variations" : {
+                  "plural" : {
+                    "one" : {
+                      "stringUnit" : {
+                        "state" : "needs_review",
+                        "value" : "%1$(Hi)llu quux"
+                      }
+                    },
+                    "other" : {
+                      "stringUnit" : {
+                        "state" : "needs_review",
+                        "value" : "%1$(Hi)llu quux"
+                      }
+                    }
+                  }
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%1$(Hi)llu quux"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.1"
+}
