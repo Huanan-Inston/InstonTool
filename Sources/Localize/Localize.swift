@@ -31,16 +31,6 @@ struct Localize: AsyncParsableCommand {
         transform: { URL(fileURLWithPath: $0).standardizedFileURL })
     var keysFile: URL?
 
-    @Option(
-        name: .customLong("token"),
-        help: "Develop token or Bearer JWT. Falls back to DROJIAN_ACCESS_TOKEN env and auth.json.")
-    var token: String?
-
-    @Option(
-        name: .customLong("secret"),
-        help: "JWT signing secret. Falls back to DROJIAN_ACCESS_SECRET env and auth.json.")
-    var secret: String?
-
     mutating func run() async throws {
         let cfg = try LocalizeConfiguration.load(cfgPath) ?? .default
         print("[INFO]: Read Configuration from file('\(cfgPath.path())'): ")
@@ -53,7 +43,7 @@ struct Localize: AsyncParsableCommand {
         var newLocalizations: [UnmanagedLocalization] = []
 
         if !keys.isEmpty || keysFile != nil {
-            let tmp = try? await fetchLocationsFromAPI(token: token, secret: secret)
+            let tmp = try? await fetchLocationsFromAPI()
             newLocalizations.append(contentsOf: tmp ?? [])
         }
 
@@ -92,8 +82,8 @@ struct Localize: AsyncParsableCommand {
         }
     }
 
-    func fetchLocationsFromAPI(token: String?, secret: String?) async throws -> [UnmanagedLocalization] {
-        guard let credential = AuthTokenStore.resolveCredential(access_key: token, access_secret: secret) else {
+    func fetchLocationsFromAPI() async throws -> [UnmanagedLocalization] {
+        guard let credential = AuthTokenStore.resolveCredential() else {
             throw ValidationError("'--keys' or '--keys-file' was specified, but no valid credential was found. Please provide a valid token and secret, or set them in the environment variables or auth.json.")
         }
 
