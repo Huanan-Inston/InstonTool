@@ -4,16 +4,42 @@ import Yams
 
 struct Localize: AsyncParsableCommand {
 
-    @Option(help: .init("The path of 'Strings'.",
-                        discussion: "The path should be a folder, and contains several `*.lproj` folders."),
-            transform: { URL(fileURLWithPath: $0).standardizedFileURL })
+    @Option(
+        help: .init("The path of 'Strings'.", discussion: "The path should be a folder, and contains several `*.lproj` folders."),
+        transform: { URL(fileURLWithPath: $0).standardizedFileURL })
     var strings: URL
 
-    @Option(name: .customLong("cfg"), help: "The path of configutation file", transform: { URL(fileURLWithPath: $0).standardizedFileURL })
+    @Option(
+        name: .customLong("cfg"), help: "The path of configutation file",
+        transform: { URL(fileURLWithPath: $0).standardizedFileURL })
     var cfgPath: URL = .init(fileURLWithPath: "./scripts/inston.yaml").standardizedFileURL
 
-    @Option(name: .customLong("downloaded"), help: "The path of configutation file", transform: { URL(fileURLWithPath: $0).standardizedFileURL })
-    var downloaded: URL = .init(fileURLWithPath: "./scripts/Assets/stringsdownload/").standardizedFileURL
+    @Option(
+        name: .customLong("downloaded"), help: "The path of configutation file",
+        transform: { URL(fileURLWithPath: $0).standardizedFileURL })
+    var downloaded: URL?
+
+    @Option(
+        name: .customLong("keys"),
+        parsing: .upToNextOption,
+        help:"The string keys to download before localizing. Supports multiple values and comma-separated values.")
+    var keys: [String] = []
+
+    @Option(
+        name: .customLong("keys-file"),
+        help: "The path of a keys file. One key per line.",
+        transform: { URL(fileURLWithPath: $0).standardizedFileURL })
+    var keysFile: URL?
+
+    @Option(
+        name: .customLong("token"),
+        help: "Develop token or Bearer JWT. Falls back to DROJIAN_ACCESS_TOKEN env and auth.json.")
+    var token: String?
+
+    @Option(
+        name: .customLong("secret"),
+        help: "JWT signing secret. Falls back to DROJIAN_ACCESS_SECRET env and auth.json.")
+    var secret: String?
 
     mutating func run() async throws {
         let cfg = try LocalizeConfiguration.load(cfgPath) ?? .default
@@ -23,24 +49,72 @@ struct Localize: AsyncParsableCommand {
         let localizations = try LocalizeHelper.getAllStringsPath(strings)
         print("[INFO]: Find \(localizations.count) Strings file.")
 
-        for localization in localizations {
-            print("[INFO]: Processing Lang(\(localization.lang)). Path: \(localization.url.path())")
-            let old = LocalizeHelper.getLocalization(localization)
 
-            let newLang = cfg.mapLangName(apple: old.lang)
-            let newURL = downloaded.appending(path: "\(newLang).strings")
+        var newLocalizations: [UnmanagedLocalization] = []
 
-            if !FileManager.default.fileExists(atPath: newURL.path()) {
-                print("[WARN]: Skiped for Lang(\(localization.lang)). Could not find downloaded file. Shuold at '\(newURL.path())'")
+        if !keys.isEmpty || keysFile != nil {
+            let tmp = try? await fetchLocationsFromAPI(token: token, secret: secret)
+            newLocalizations.append(contentsOf: tmp ?? [])
+        }
+
+        if let downloaded {
+            let tmp = try? getLocationsFromDownloadFolder(downloaded)
+            newLocalizations.append(contentsOf: tmp ?? [])
+        }
+
+        guard newLocalizations.count > 0 else {
+            print("[ERROR]: No New Locations Founds")
+            return
+        }
+
+        for destination in localizations {
+            print("[INFO]: Processing Lang(\(destination.lang)). Path: \(destination.url.path())")
+
+            do {
+                let old = try LocalizeHelper.getLocalization(destination)
+
+                let newLang = cfg.mapLangName(apple: old.lang)
+                let new: UnmanagedLocalization? = newLocalizations.first { $0.lang == newLang }
+                guard let new else {
+                    continue
+                }
+
+
+                let updated = old.update(new) {
+                    cfg.ignoreKeys?.contains($0) ?? false
+                }
+                try LocalizeHelper.writeLocalization(updated)
+            } catch {
+                print("[ERROR]: Failed to process Lang(\(destination.lang)). Error: \(error)")
             }
 
-            let newLocalization = Localization(lang: newLang, url: newURL, content: nil)
-            let new = LocalizeHelper.getLocalization(newLocalization)
-
-            let updated = LocalizeHelper.updateLocalization(old: old, new: new) { cfg.ignoreKeys?.contains($0) ?? false }
-            try LocalizeHelper.writeLocalization(updated)
-
-            print("[INFO]: Finish Lang(\(localization.lang)).")
+            print("[INFO]: Finish Lang(\(destination.lang)).")
         }
+    }
+
+    func fetchLocationsFromAPI(token: String?, secret: String?) async throws -> [UnmanagedLocalization] {
+        guard let credential = AuthTokenStore.resolveCredential(access_key: token, access_secret: secret) else {
+            throw ValidationError("'--keys' or '--keys-file' was specified, but no valid credential was found. Please provide a valid token and secret, or set them in the environment variables or auth.json.")
+        }
+
+        let keys = try LocalizeRemoteKeyParser.loadKeys(rawKeys: keys, keysFile: keysFile)
+
+        let downloader = Downloader(credential: credential)
+        return try await downloader.download(keys: keys)
+    }
+
+    func getLocationsFromDownloadFolder(_ downloaded: URL) throws -> [UnmanagedLocalization] {
+        let destications = try? LocalizeHelper.getAllStringsPathInLangNameFormat(downloaded)
+        guard let destications else {
+            print("[ERROR]: Failed to read downloaded localization files in path: \(downloaded.path()). Please check the path and try again.")
+            return []
+        }
+
+        var newLocalizations: [UnmanagedLocalization] = []
+        for destination in destications {
+            let new = try LocalizeHelper.getLocalization(destination)
+            newLocalizations.append(new.detach())
+        }
+        return newLocalizations
     }
 }

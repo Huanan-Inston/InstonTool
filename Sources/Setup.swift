@@ -57,12 +57,15 @@ struct Setup: AsyncParsableCommand {
         print("[INFO]: Find \(valid.count) valid keys. Saved to file('Assets/keys.used').")
     }
 
-    func grabAllKeys(_ localizations: [Localization]) throws -> Set<String> {
+    func grabAllKeys(_ localizations: [LocalizationDestination]) throws -> Set<String> {
         var keys: Set<String> = .init()
         for localization in localizations {
-            let strings = LocalizeHelper.getLocalization(localization)
-            if let content = strings.content {
+            do {
+                let strings = try LocalizeHelper.getLocalization(localization)
+                let content = strings.content
                 keys.formUnion(content.keys)
+            } catch {
+                print("[ERROR]: grab keys failed on \(localization.lang) at \(localization.url). error: \(error)")
             }
         }
         return keys
