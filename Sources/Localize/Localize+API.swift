@@ -8,6 +8,7 @@
 import ArgumentParser
 import Foundation
 import Alamofire
+import DynamicJSON
 
 enum RemoteLocalizationParser {
     static func localizations(
@@ -52,8 +53,9 @@ extension Localize {
         let credential: APIGateway.Credential
 
         func download(keys: [String]) async throws -> [UnmanagedLocalization] {
-            let body = [
-                "skeys": keys
+            let body: JSON = [
+                "platform": 2,
+                "skeys": keys.jsonValue ?? []
             ]
             let result: StringsBatchQueryResponse = try await APIGateway.Client(credential: credential).request(endpoint: .strings_batch_query, body: body)
             return result.toUnmanagedLocalization()
