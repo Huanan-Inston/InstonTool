@@ -65,13 +65,26 @@ extension Localize {
 
             var newLocalizations: [UnmanagedLocalization] = []
 
+            // Load API Localizations
             if !keys.isEmpty || keysFile != nil {
                 let tmp = try? await fetchLocationsFromAPI()
+
+                for l in tmp ?? [] {
+                    print("[INFO]: API Load Lang(\(l.lang)) Strings \(l.content.count) keys")
+                }
+
                 newLocalizations.append(contentsOf: tmp ?? [])
             }
 
+
+            // Load Downloaded Localizations
             if let downloaded {
                 let tmp = try? getLocationsFromDownloadFolder(downloaded)
+
+                for l in tmp ?? [] {
+                    print("[INFO]: Download Load Lang(\(l.lang)) Strings \(l.content.count) keys")
+                }
+
                 newLocalizations.append(contentsOf: tmp ?? [])
             }
 
@@ -80,6 +93,9 @@ extension Localize {
                 return
             }
 
+            var updatedLocalizations: [Localization] = []
+
+            // Update Localization From New Strings
             for destination in localizations {
                 print("[INFO]: Processing Lang(\(destination.lang)). Path: \(destination.url.path())")
 
@@ -88,20 +104,33 @@ extension Localize {
 
                     let newLang = cfg.mapLangName(apple: old.lang)
                     let new: UnmanagedLocalization? = newLocalizations.first { $0.lang == newLang }
-                    guard let new else {
-                        continue
+                    guard let new else { 
+                        print("[WARN]: Lang(\(destination.lang)) not found in new localizations. Skip updating this language. Possible Lang Mapping: \(newLang)")
+                        continue 
                     }
-
 
                     let updated = old.update(new) {
                         cfg.ignoreKeys?.contains($0) ?? false
                     }
-                    try LocalizeHelper.writeLocalization(updated)
+
+                    updatedLocalizations.append(updated)
                 } catch {
                     print("[ERROR]: Failed to process Lang(\(destination.lang)). Error: \(error)")
                 }
+            }
 
-                print("[INFO]: Finish Lang(\(destination.lang)).")
+            let allKeys = Set(updatedLocalizations.flatMap { $0.content.keys })
+
+            // Save
+            for localization in updatedLocalizations {
+                let keys = localization.content.keys
+                let miss = allKeys.subtracting(keys)
+                if miss.count > 0 {
+                    print("[WARN]: Lang(\(localization.lang)) miss keys: \(miss).")
+                }
+
+                try LocalizeHelper.writeLocalization(localization)
+                print("[INFO]: Update Lang(\(localization.lang)).")
             }
         }
 
