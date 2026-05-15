@@ -11,10 +11,20 @@ import RegexBuilder
 
 
 struct Setup: AsyncParsableCommand {
+    static let configuration: CommandConfiguration = .init(
+        commandName: "setup",
+        abstract: "Find Strings from project and list missing Strings",
+        usage: """
+        tool setup <pattern>... --strings <strings> [--proj <proj>] [--assets <assets>]
+        
+        Example:
+            tool setup "(?<=L\\(@\")([_\\w]+)(?=\")" --strings ./MapRunner/Strings    
+        """
+    )
 
     @Argument(help: .init("The regex express to filer in the keys inside project",
                           discussion: "Before execute the command, you can test the regex using `ripgrep`"))
-    var pattern: [String] = []
+    var pattern: [String]
 
     @Option(help: .init("The folder path of 'Strings'.",
                         discussion: "The folder should contain several `*.lproj` folders."),
@@ -29,9 +39,6 @@ struct Setup: AsyncParsableCommand {
 
     @Option(name: .customLong("assets"), help: "The folder path where the 'keys' to be read or saved", transform: { URL(fileURLWithPath: $0).standardizedFileURL })
     var assetsStore: URL = .init(fileURLWithPath: "./scripts/Assets").standardizedFileURL
-
-    @Option(help: "Suppress Logs")
-    var quiet: Bool = false
 
     func run() async throws {
         let stringsFilesPath = try LocalizeHelper.getAllStringsPath(strings)

@@ -11,7 +11,7 @@ import Foundation
 struct Auth: ParsableCommand {
     static let configuration: CommandConfiguration = .init(
         commandName: "auth",
-        abstract: "Save APIGateway auth token."
+        abstract: "Save or update the APIGateway credential."
     )
 
     @Option(name: .customLong("access_key"),
@@ -30,7 +30,7 @@ struct Auth: ParsableCommand {
 
         let secret = access_secret.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !secret.isEmpty else {
-            throw ValidationError("'--secret' cannot be empty.")
+            throw ValidationError("'--access_secret' cannot be empty.")
         }
 
         try AuthTokenStore.save(token: access_key, secret: secret)

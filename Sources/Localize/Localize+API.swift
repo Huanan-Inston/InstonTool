@@ -5,10 +5,10 @@
 //  Created by Huanan on 2026/5/13.
 //
 
-import ArgumentParser
-import Foundation
 import Alamofire
+import ArgumentParser
 import DynamicJSON
+import Foundation
 
 enum RemoteLocalizationParser {
     static func localizations(
@@ -61,26 +61,7 @@ extension Localize {
             return result.toUnmanagedLocalization()
         }
     }
-
 }
-
-//struct StringsBatchQueryClient {
-//    func batchQuery(keys: [String]) async throws -> [UnmanagedLocalization] {
-//        let body = [
-//            "skeys": keys
-//        ]
-//
-//        let result = try await AF.request(
-//            url,
-//            method: .post,
-//            parameters: body,
-//            encoder: URLEncodedFormParameterEncoder.default,
-//            headers: [.authorization(bearerToken: token)]
-//        ).serializingDecodable(StringsBatchQueryResponse.self).value
-//
-//        return result.toUnmanagedLocalization()
-//    }
-//}
 
 extension StringsBatchQueryResponse {
     func toUnmanagedLocalization() -> [UnmanagedLocalization] {
