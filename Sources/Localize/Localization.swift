@@ -106,7 +106,7 @@ extension LocalizeHelper {
         let langFiles = try FileManager.default.contentsOfDirectory(at: path, includingPropertiesForKeys: [.isRegularFileKey, .nameKey])
         for langFile in langFiles {
             let values = try langFile.resourceValues(forKeys: [.isDirectoryKey, .nameKey])
-            guard values.isDirectory == false else { continue }
+            guard values.isDirectory == false && values.name!.hasSuffix("strings") else { continue }
 
             let lang = langFile.lastPathComponent
             result.append(LocalizationDestination(lang: lang, url: langFile))
