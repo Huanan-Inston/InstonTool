@@ -109,7 +109,7 @@ extension LocalizeHelper {
             guard values.isDirectory == false && values.name!.hasSuffix("strings") else { continue }
 
             let lang = langFile.lastPathComponent
-            result.append(LocalizationDestination(lang: lang, url: langFile))
+            result.append(LocalizationDestination(lang: lang.replacing(".strings", with: ""), url: langFile))
         }
 
         return result
