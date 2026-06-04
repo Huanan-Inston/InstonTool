@@ -52,10 +52,11 @@ extension Localize {
     struct Downloader {
         let credential: APIGateway.Credential
 
-        func download(keys: [String]) async throws -> [UnmanagedLocalization] {
+        func download(keys: [String], exact: Bool = true) async throws -> [UnmanagedLocalization] {
             let body: JSON = [
                 "platform": 2,
-                "skeys": keys.jsonValue ?? []
+                "skeys": keys.jsonValue ?? [],
+                "is_exact": exact ? 1 : 0
             ]
             let result: StringsBatchQueryResponse = try await APIGateway.Client(credential: credential).request(endpoint: .strings_batch_query, body: body)
             return result.toUnmanagedLocalization()
