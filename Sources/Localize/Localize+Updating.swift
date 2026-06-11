@@ -103,7 +103,7 @@ extension Localize {
                     let old = try LocalizeHelper.getLocalization(destination)
 
                     let newLang = cfg.mapLangName(apple: old.lang)
-                    let new: UnmanagedLocalization? = newLocalizations.first { $0.lang == newLang }
+                    let new: UnmanagedLocalization? = newLocalizations.first { $0.lang.lowercased() == newLang.lowercased() }
                     guard let new else { 
                         print("[WARN]: Lang(\(destination.lang)) not found in new localizations. Skip updating this language. Possible Lang Mapping: \(newLang)")
                         continue 
